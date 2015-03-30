@@ -1,18 +1,18 @@
 {
-  "name": "grunt-google-translate",
+  "name": "grunt-google-translate-extended",
   "description": "Automatically generate localized json files using angular-translate source files, and Google Translate REST API",
   "version": "0.1.3",
-  "homepage": "https://github.com/MartyIce/grunt-google-translate",
+  "homepage": "https://github.com/HarriLLC/grunt-google-translate",
   "author": {
     "name": "Marty Mavis",
     "email": "marty.mavis@csgi.com"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/MartyIce/grunt-google-translate"
+    "url": "git://github.com/HarriLLC/grunt-google-translate"
   },
   "bugs": {
-    "url": "https://github.com/MartyIce/grunt-google-translate/issues"
+    "url": "https://github.com/HarriLLC/grunt-google-translate"
   },
   "licenses": [
     {
