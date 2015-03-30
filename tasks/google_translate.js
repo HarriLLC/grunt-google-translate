@@ -212,7 +212,6 @@ module.exports = function(grunt) {
             findFragmentsToTranslate(sourceObject, translation, fragmentsToTranslate);
 
             translateFragments(fragmentsToTranslate, language).then(function(result) {
-                console.log(result.data.translations[0].translatedText);
 
                 for(var i = 0, count = fragmentsToTranslate.length; i < count; i++) {
                     var frag = fragmentsToTranslate[i];
@@ -332,8 +331,15 @@ module.exports = function(grunt) {
                     }
                     for (var j = 0; j < languageTranslation.translations.length; j++) {
                         if (languageTranslation.language !== options.sourceLanguageCode) {
+                            var prefix = "";
+
+                            if(options.jSOutput && options.jSOutput === true) {
+                                languageTranslation.translations[j].file = languageTranslation.translations[j].file.replace('.json', '.js');
+                                var prefix = "var lang = ";
+                            }
+
                             grunt.log.writeln('writing file: ' + languageTranslation.translations[j].file);
-                            grunt.file.write(languageTranslation.translations[j].file, JSON.stringify(languageTranslation.translations[j].translation));
+                            grunt.file.write(languageTranslation.translations[j].file, prefix + JSON.stringify(languageTranslation.translations[j].translation));
                         }
                     }
                 }
