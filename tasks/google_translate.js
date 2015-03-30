@@ -23,7 +23,7 @@ module.exports = function(grunt) {
             restrictToLanguages: []
         });
 
-        console.log('api: ' + options.googleApiKey);
+
         if(options.googleApiKey.length === 0) {
             grunt.fail.fatal('A Google API key must be provided in order to access their REST API.');
         }
@@ -114,20 +114,63 @@ module.exports = function(grunt) {
                 var queryString = 'https://www.googleapis.com/language/translate/v2?key=' + options.googleApiKey +
                     '&source=' + options.sourceLanguageCode +
                     '&target=' + language;
+
+                var queries = [];
+                var activeQuery = 0;
                 for(var i = 0; i < fragmentsToTranslate.length; i++) {
-                    queryString = queryString + '&q=' + fragmentsToTranslate[i].sourceFragment;
+
+                    if(!queries[activeQuery]) {
+                        queries[activeQuery] = "";
+                    }
+
+                    if(queryString.length + queries[activeQuery].length >= 2000) {
+                        activeQuery++;
+                        queries[activeQuery] = "";
+                    }
+
+                    queries[activeQuery] = queries[activeQuery] + '&q=' + encodeURIComponent(fragmentsToTranslate[i].sourceFragment);
                 }
 
                 grunt.log.writeln();
-                grunt.log.writeln(queryString);
 
-                rest.get(queryString).on('complete', function(result) {
-                    if (result instanceof Error) {
-                        console.log('Error:', result.message);
-                        deferred.reject(new Error(result));
-                    } else {
-                        deferred.resolve(result);
+                var getRequests = [];
+                for(var k = 0; k < queries.length ; k++) {
+                    var loadingDeferred = q.defer();
+
+                    (function(fullQuery, loadingDeferred, k) {
+                        rest.get(fullQuery).on('complete', function(result) {
+
+                            if (result instanceof Error) {
+                                console.log('Error:', result.message);
+                                loadingDeferred.reject(new Error(result));
+                            } else {
+                                if(result.error) {
+                                    console.log('Error while translating', fullQuery);
+                                }
+                                loadingDeferred.resolve(result);
+                            }
+
+                        });
+                    })(queryString + queries[k], loadingDeferred, k);
+
+                    getRequests.push( loadingDeferred.promise );
+                }
+
+                q.all(getRequests).then(function(result) {
+                    var mainResult = {data:
+                        {translations:[]}
+                    };
+
+                    for(var j = 0; j < result.length ; j++) {
+                        //copy sub-result to mainResult
+                        var subResult = result[j].data.translations;
+
+                        for(var jar = 0 ; jar < subResult.length ; jar++) {
+                            mainResult.data.translations.push( subResult[jar] );
+                        }
                     }
+
+                    deferred.resolve(mainResult);
                 });
             }
             else {
@@ -142,11 +185,16 @@ module.exports = function(grunt) {
                 if(typeof sourceObject[propertyName] === 'string') {
                     if(!translatedObject.hasOwnProperty(propertyName)) {
 
-                        fragmentsToTranslate.push(
-                            { 'translatedObject' : translatedObject,
-                                'propertyName' : propertyName,
-                                'sourceFragment': sourceObject[propertyName]
-                            });
+                        var langObj = { 'translatedObject' : translatedObject,
+                            'propertyName' : propertyName,
+                            'sourceFragment': sourceObject[propertyName]
+                        };
+
+                        if(langObj.sourceFragment == "") {
+                            langObj.sourceFragment = propertyName;
+                        }
+
+                        fragmentsToTranslate.push(langObj);
                     }
                 }
                 else {
@@ -164,9 +212,13 @@ module.exports = function(grunt) {
             findFragmentsToTranslate(sourceObject, translation, fragmentsToTranslate);
 
             translateFragments(fragmentsToTranslate, language).then(function(result) {
+                console.log(result.data.translations[0].translatedText);
 
                 for(var i = 0, count = fragmentsToTranslate.length; i < count; i++) {
                     var frag = fragmentsToTranslate[i];
+                    if(i>=result.data.translations.length) {
+                        break;
+                    }
                     frag.translatedObject[frag.propertyName] = result.data.translations[i].translatedText.replace('&#39;', '\'');
                 }
 
