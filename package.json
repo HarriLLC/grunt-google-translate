@@ -1,7 +1,7 @@
 {
   "name": "grunt-google-translate-extended",
   "description": "Automatically generate localized json files using angular-translate source files, and Google Translate REST API",
-  "version": "0.2",
+  "version": "0.1.4",
   "homepage": "https://github.com/HarriLLC/grunt-google-translate",
   "author": {
     "name": "Marty Mavis",
