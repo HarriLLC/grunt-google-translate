@@ -332,11 +332,12 @@ module.exports = function(grunt) {
                     for (var j = 0; j < languageTranslation.translations.length; j++) {
                         if (languageTranslation.language !== options.sourceLanguageCode) {
                             var prefix = "";
+                            var postfix = "";
 
                             if(options.jSOutput && options.jSOutput === true) {
                                 languageTranslation.translations[j].file = languageTranslation.translations[j].file.replace('.json', '.js');
-                                var prefix = "var lang = ";
-                                var postfix = "if (typeof module !== 'undefined') {module.exports = lang;}";
+                                prefix = "var lang = ";
+                                postfix = "if (typeof module !== 'undefined') {module.exports = lang;}";
                             }
 
                             grunt.log.writeln('writing file: ' + languageTranslation.translations[j].file);
