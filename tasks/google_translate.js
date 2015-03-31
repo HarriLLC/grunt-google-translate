@@ -340,7 +340,7 @@ module.exports = function(grunt) {
                             }
 
                             grunt.log.writeln('writing file: ' + languageTranslation.translations[j].file);
-                            grunt.file.write(languageTranslation.translations[j].file, prefix + JSON.stringify(languageTranslation.translations[j].translation));
+                            grunt.file.write(languageTranslation.translations[j].file, prefix + JSON.stringify(languageTranslation.translations[j].translation) + postfix);
                         }
                     }
                 }
