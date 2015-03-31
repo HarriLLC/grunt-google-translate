@@ -337,7 +337,7 @@ module.exports = function(grunt) {
                             if(options.jSOutput && options.jSOutput === true) {
                                 languageTranslation.translations[j].file = languageTranslation.translations[j].file.replace('.json', '.js');
                                 prefix = "var lang = ";
-                                postfix = "if (typeof module !== 'undefined') {module.exports = lang;}";
+                                postfix = "; if (typeof module !== 'undefined') {module.exports = lang;}; ";
                             }
 
                             grunt.log.writeln('writing file: ' + languageTranslation.translations[j].file);
